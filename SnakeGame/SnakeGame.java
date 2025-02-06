@@ -8,11 +8,15 @@ public class SnakeGame extends JPanel implements KeyListener, ActionListener {
     private static final int DEFAULT_SCREEN_WIDTH = 800;
     private static final int DEFAULT_SCREEN_HEIGHT = 600;
 
-    private static final int gameWidth = 560;
-    private static final int gameHeight = 520;
-    private static final int x1 = 50;
-    private static final int y1 = 40;
+    private static final int gameWidth = 580;
+    private static final int gameHeight = 440;
+    
+    private static final int x1 = 100;
+    private static final int y1 = 60;
     private static int tileSize = 20; // this is the number of squares within the game area
+    private static FontMetrics metrics;
+
+    private Image backgroundImage;
 
     public class Tile {
         int x;
@@ -23,7 +27,6 @@ public class SnakeGame extends JPanel implements KeyListener, ActionListener {
             this.y = y;
         }
     }
-
     // Snake (start)
     Tile snakeHead;
     ArrayList<Tile> snakeBody;
@@ -39,13 +42,15 @@ public class SnakeGame extends JPanel implements KeyListener, ActionListener {
     boolean gameOver = false;
     boolean gameStarted = false;
 
-    public SnakeGame() {
+    public SnakeGame(Image backgroundImage) {
         super();
+        this.backgroundImage = backgroundImage;
+        JFrame frame = new JFrame("Snake Game");
         setPreferredSize(new Dimension(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT));
         setBackground(Color.BLACK);
         addKeyListener(this);
         setFocusable(true);
-
+        
         snakeHead = new Tile(5, 5);
         snakeBody = new ArrayList<>();
 
@@ -63,6 +68,11 @@ public class SnakeGame extends JPanel implements KeyListener, ActionListener {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
+        // Background image
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+        }
 
         // Game area
         Graphics2D g2d = (Graphics2D) g;
@@ -93,6 +103,17 @@ public class SnakeGame extends JPanel implements KeyListener, ActionListener {
             g2d.fill3DRect(x1 + snakePart.x * tileSize, y1 + snakePart.y * tileSize, tileSize, tileSize, true);
         }
 
+        // Highscore
+        g2d.setColor(Color.BLUE);
+        g2d.setFont(new Font("Arial", Font.BOLD, 20));
+        String highscoreText = "Highscore: " + snakeBody.size();
+                
+        // Positioning the highscore text in the blank space
+        int highscoreX = DEFAULT_SCREEN_WIDTH + (x1 + gameWidth - DEFAULT_SCREEN_WIDTH - g2d.getFontMetrics().stringWidth(highscoreText)) / 2;
+        int highscoreY = y1 + 30; // Adjust the Y position as needed
+        g2d.drawString(highscoreText, highscoreX, highscoreY);
+        
+
         // Game over pop-up screen
         if (gameOver) {
             g2d.setColor(new Color(0, 0, 0, 150));
@@ -101,30 +122,33 @@ public class SnakeGame extends JPanel implements KeyListener, ActionListener {
             g2d.setColor(Color.GREEN);
             g2d.setFont(new Font("Arial", Font.BOLD | Font.ITALIC, 50));
             String gameOverText = "Game Over";
-            FontMetrics metrics = g2d.getFontMetrics();
+            metrics = g2d.getFontMetrics();
             int x = (DEFAULT_SCREEN_WIDTH - metrics.stringWidth(gameOverText)) / 2;
             int y = DEFAULT_SCREEN_HEIGHT / 3;
             g2d.drawString(gameOverText, x, y);
 
-            g2d.setFont(new Font("Arial", Font.BOLD, 50));
+            g2d.setFont(new Font("Arial", Font.BOLD, 25));
             String restartText = "Press 'R' to restart";
             metrics = g2d.getFontMetrics();
             x = (DEFAULT_SCREEN_WIDTH - metrics.stringWidth(restartText)) / 2;
-            y = DEFAULT_SCREEN_HEIGHT / 2;
+            y = DEFAULT_SCREEN_HEIGHT + (y1 + gameHeight - DEFAULT_SCREEN_HEIGHT - y1);
             g2d.drawString(restartText, x, y);
+
+            g2d.setFont(new Font("Arial", Font.BOLD, 25));
+            String gameOverScore = "Your highscore is: " + snakeBody.size();
+            metrics = g2d.getFontMetrics();
+            x = (DEFAULT_SCREEN_WIDTH - metrics.stringWidth(gameOverScore)) / 2;
+            y = DEFAULT_SCREEN_HEIGHT / 2;
+            g2d.drawString(gameOverScore, x, y);
+
         } 
-
-        // highscore 
-        g2d.setColor(Color.BLUE);
-        g2d.setFont(new Font("Arial", Font.BOLD, 20));
-        g2d.drawString("Score: " + String.valueOf(snakeBody.size()), (DEFAULT_SCREEN_WIDTH) / 10, DEFAULT_SCREEN_HEIGHT - y1); // this shows the score while playing
         
-
+        // Press space bar to start
         if (!gameStarted) {
             g2d.setColor(Color.WHITE);
             g2d.setFont(new Font("Arial", Font.BOLD, 50));
             String startMessage = "Press 'SPACE' to start";
-            FontMetrics metrics = g2d.getFontMetrics();
+            metrics = g2d.getFontMetrics();
             int x = (DEFAULT_SCREEN_WIDTH - metrics.stringWidth(startMessage)) / 2;
             int y = DEFAULT_SCREEN_HEIGHT / 2;
             g2d.drawString(startMessage, x, y);
